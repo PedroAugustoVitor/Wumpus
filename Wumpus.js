@@ -13,17 +13,26 @@ const removeParenteses = function(sentenca){
 }
 
 const igual = function(sentenca1, sentenca2){
-    sentenca1 = removeParenteses(sentenca1);
-    sentenca2 = removeParenteses(sentenca2);
+    //sentenca1 = removeParenteses(sentenca1);
+    //sentenca2 = removeParenteses(sentenca2);
+    //console.log(sentenca1, sentenca2);
     if(sentenca1.operador != sentenca2.operador){
         return false;
     }
-    else if(sentenca1.operador == sentenca2.operador && sentenca1.operador == null){
-        
+    else if(sentenca1.operador == null){
+        if (sentenca1.primeiro !== sentenca2.primeiro){
+            return false;
+        }
+        else { 
+            return true;
+        }
+    }
+    else{
+        return igual(sentenca1.primeiro, sentenca2.primeiro) && igual(sentenca1.segundo, sentenca2.segundo);
     }
 }
+
 const provaE = function(i){
-    console.log(baseConhecimento[i]);
     baseConhecimento.push(new Sentenca(baseConhecimento[i].primeiro.operador, baseConhecimento[i].primeiro.primeiro, baseConhecimento[i].primeiro.segundo));
     baseConhecimento.push(new Sentenca(baseConhecimento[i].segundo.operador, baseConhecimento[i].segundo.primeiro, baseConhecimento[i].segundo.segundo));
     baseConhecimento.splice(i, 1);
@@ -35,13 +44,13 @@ const converteImplica = function(i){
 const tentaProvarOu = function(sentenca, i){
     if(procura(new Sentenca('¬', sentenca.primeiro))){
         baseConhecimento.splice(i, 1);
-        baseConhecimento.push(new Sentenca(null, sentenca.segundo));
+        baseConhecimento.push(sentenca.segundo);
         return true;
     }
     return false;
 }
 const checaDuplaNegacao = function(sentenca){
-    if (sentenca.operador === '¬'){
+    if (sentenca.operador === '¬' && sentenca.primeiro.operador === '¬'){
         return true;
     }
     return false;
@@ -55,24 +64,22 @@ const imprime = function(){
 const baseConhecimento = [];
 
 let procura = function (sentenca){
-    if(sentenca.operador === '¬' && checaDuplaNegacao(sentenca.primeiro)){
-        console.log(sentenca.primeiro.primeiro);
+    if(checaDuplaNegacao(sentenca)){
         sentenca = sentenca.primeiro.primeiro;
     }
-    
     for(let i = 0; i < baseConhecimento.length; i++){
-        if(sentenca === baseConhecimento[i]){
+        if(igual(sentenca, baseConhecimento[i])){
             return true;
         }
     }
     return false;
-};
+}
 const processa = function(){
     for(let i = 0; i < baseConhecimento.length; i++){
         switch(baseConhecimento[i].operador){
             case '>':
-                console.log('Nâo foi aqui');
                 converteImplica(i);
+                //console.log(baseConhecimento[i]);
                 tentaProvarOu(baseConhecimento[i], i);
                 break;
             case 'OU':
@@ -80,26 +87,23 @@ const processa = function(){
                 break;
             case 'E':
                 provaE(i);
-                i = 0;
+                i = -1;
                 break;
-            //default:
-                //break;
+            default:
+                break;
         }
     }
 }
 
 // TESTE //
-baseConhecimento.push(new Sentenca('>', new Sentenca(null, 'P'), new Sentenca(null, 'Q')));
 baseConhecimento.push(new Sentenca('E', new Sentenca(null, 'P'), new Sentenca(null, 'R')));
-//baseConhecimento.push(new Sentenca(null, 'P'));
+baseConhecimento.push(new Sentenca('>', new Sentenca(null, 'P'), new Sentenca(null, 'Q')));
 console.log('-----------------');
+
+processa();
+
+
 imprime();
-
-
-
-
-
-
 
 
 //
